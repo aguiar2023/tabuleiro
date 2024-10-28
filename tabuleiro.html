@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campo Minado</title>
+    <style>
+        #tabuleiro {
+            display: grid;
+            gap: 5px;
+        }
+        .celula {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+        .revelado {
+            background-color: lightgray;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+    <h1>Campo Minado</h1>
+    <label for="tamanho">Escolha o tamanho do tabuleiro:</label>
+    <select id="tamanho">
+        <option value="3">3x3</option>
+        <option value="6">6x6</option>
+    </select>
+    <button onclick="iniciarJogo()">Iniciar Jogo</button>
+    <div id="tabuleiro"></div>
+    <p id="mensagem"></p>
+
+    <script>
+        const tabuleiro = document.getElementById("tabuleiro");
+        const mensagem = document.getElementById("mensagem");
+        const tamanhoSelect = document.getElementById("tamanho");
+
+        function iniciarJogo() {
+            const tamanho = parseInt(tamanhoSelect.value);
+            tabuleiro.style.gridTemplateColumns = `repeat(${tamanho}, 50px)`;
+            tabuleiro.style.gridTemplateRows = `repeat(${tamanho}, 50px)`;
+            tabuleiro.innerHTML = '';
+            mensagem.textContent = '';
+
+            const minas = Array.from({ length: tamanho * tamanho }, () => Math.random() < 0.3 ? "*" : "");
+
+            minas.forEach((valor, index) => {
+                const celula = document.createElement("div");
+                celula.classList.add("celula");
+                celula.dataset.index = index;
+                celula.addEventListener("click", revelarCelula);
+                tabuleiro.appendChild(celula);
+            });
+        }
+
+        function revelarCelula(event) {
+            const celula = event.target;
+            const index = celula.dataset.index;
+
+            if (celula.classList.contains("revelado")) return;
+
+            celula.textContent = minas[index];
+            celula.classList.add("revelado");
+
+            if (minas[index] === "*") {
+                mensagem.textContent = "Você encontrou uma mina! Fim de jogo!";
+                Array.from(document.getElementsByClassName("celula")).forEach(cel => cel.removeEventListener("click", revelarCelula));
+            } else if (document.querySelectorAll(".celula:not(.revelado)").length === document.querySelectorAll(".celula[data-index='']:not(.revelado)").length) {
+                mensagem.textContent = "Parabéns! Você venceu!";
+            }
+        }
+    </script>
+</body>
+</html>
